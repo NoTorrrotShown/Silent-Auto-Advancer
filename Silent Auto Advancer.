@@ -1,0 +1,63 @@
+// ==UserScript==
+// @name         Automatic Activity Advancer.
+// @namespace    http://tampermonkey.net/
+// @version      1.1.1.1.1.1.1.1.1.1.1.1.1.1.1
+// @description  Automatically advances to the next activity by clicking the navigation button.
+// @author       NoTorrrotShown
+// @match        *.core.learn.edgenuity.com/*
+// @grant        None.
+// ==/UserScript==
+
+(function() {
+    'use strict';
+
+    const targetSelector = 'a.footnav.goRight';
+    let intervalId = null;
+
+    function clickTargetElement() {
+        const targetElement = document.querySelector(targetSelector);
+        if (targetElement) {
+            targetElement.click();
+        }
+    }
+
+    function startClicking() {
+        intervalId = setInterval(clickTargetElement, 1000); // Click every 1 second
+    }
+
+    function stopClicking() {
+        if (intervalId) {
+            clearInterval(intervalId);
+            intervalId = null;
+        }
+    }
+
+    // Check if the element is already present
+    const initialTargetElement = document.querySelector(targetSelector);
+    if (initialTargetElement) {
+        startClicking();
+    } else {
+        // If not, use a MutationObserver to wait for it
+        const observer = new MutationObserver((mutations, obs) => {
+            const targetElement = document.querySelector(targetSelector);
+            if (targetElement) {
+                startClicking();
+                obs.disconnect(); // Stop observing once the element is found
+            }
+        });
+
+        observer.observe(document.body, {
+            childList: true,
+            subtree: true
+        });
+    }
+
+    // You can add a way to stop the script if needed, e.g., by pressing a key
+    // For example, to stop when pressing the 'S' key:
+    document.addEventListener('keydown', (event) => {
+        if (event.key === 's' || event.key === 'S') {
+            stopClicking();
+            console.log('Automatic clicking stopped.');
+        }
+    });
+})();
